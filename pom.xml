@@ -7,6 +7,10 @@
     <groupId>super9du.sia.aliyun.sms</groupId>
     <artifactId>aliyun-sms-spring-boot-starter</artifactId>
     <version>0.0.1-SNAPSHOT</version>
+
+    <name>${project.artifactId}</name>
+    <description>Aliyun SMS Spring Boot Starter</description>
+    <url>https://github.com/super9du/aliyun-sms-spring-boot-starter</url>
     <licenses>
         <license>
             <name>MIT License</name>
