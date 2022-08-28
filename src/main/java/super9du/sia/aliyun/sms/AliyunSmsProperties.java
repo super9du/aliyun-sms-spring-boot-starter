@@ -65,8 +65,8 @@ public class AliyunSmsProperties implements InitializingBean {
         Assert.hasText(accessKeyId, "properties aliyun.sms.accessKeyId is black");
         Assert.hasText(accessKeySecret, "properties aliyun.sms.accessKeySecret is black");
         Assert.hasText(signature, "properties aliyun.sms.signature is black");
-        if (templates.size() <= 1) {
-            throw new IllegalStateException("properties aliyun.sms.signature templates is not set");
+        if (templates.size() < 1) {
+            throw new IllegalStateException("properties aliyun.sms.templates require at least one template-code");
         }
     }
 
