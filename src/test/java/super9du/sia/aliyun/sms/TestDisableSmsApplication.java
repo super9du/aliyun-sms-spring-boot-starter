@@ -11,21 +11,34 @@
 
 package super9du.sia.aliyun.sms;
 
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.annotation.Profile;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.util.Assert;
 
-@Profile("disable")
-@SpringBootApplication
+import java.util.Arrays;
+
+@SuppressWarnings("deprecation")
+@ActiveProfiles("disable")
+@SpringBootTest(classes = {AliyunSmsAutoConfiguration.class})
 public class TestDisableSmsApplication {
 
-    public static void main(String[] args) {
-        ConfigurableApplicationContext ctx = SpringApplication.run(TestDisableSmsApplication.class, args);
+    @Autowired
+    ApplicationContext ctx;
+
+    @Test
+    void disableAliyunSmsAutoConfiguration() {
         try {
+            String[] activeProfiles = ctx.getEnvironment().getActiveProfiles();
+            System.out.println(Arrays.toString(activeProfiles));
+            Assert.state(activeProfiles.length == 1);
+            Assert.state("disable".equals(activeProfiles[0]));
             ctx.getBean(AliyunSmsProperties.class);
         } catch (NoSuchBeanDefinitionException e) {
+            System.out.println("FINISH");
             return;
         }
         throw new RuntimeException("aliyun-sms has not been disabled");

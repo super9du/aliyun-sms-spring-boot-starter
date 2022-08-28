@@ -18,6 +18,8 @@ import com.aliyun.dysmsapi20170525.models.SendSmsRequest;
 import com.aliyun.dysmsapi20170525.models.SendSmsResponse;
 import lombok.Getter;
 
+import java.util.Map;
+
 public class AliyunSmsTemplate {
     @Getter
     private final Client client;
@@ -29,28 +31,70 @@ public class AliyunSmsTemplate {
     }
 
     /**
-     * 使用指定的「短信模板编号」发送短信
+     * 向指定手机号发送手机验证码。
+     * <p>
+     * <strong>仅在 {@link AliyunSmsProperties#getTemplates()} 的 size 为 1 时可直接使用，否则将抛出异常</strong>
      *
-     * @param templateCode 阿里云「短信模板编号」
-     * @param phoneNumber  发送的手机号
-     * @return {@link SendSmsResponse}
+     * @param phoneNumber 发送的手机号
+     * @return 已发送的手机验证码
+     * @throws IllegalStateException 使用阿里云客户端发送短信的响应与预期不符
      */
-    public SendSmsResponse send(String templateCode, String phoneNumber) throws Exception {
-        return client.sendSms(createSendSmsRequest(templateCode, phoneNumber));
+    public String sendAuthCode(String phoneNumber) throws Exception {
+        String templateCode, authCode;
+        templateCode = aliyunSmsProperties.getTemplateCodeIfOnlyOne();
+        authCode = Utils.generateAuthCode();
+        SendSmsResponse resp = send(templateCode, phoneNumber, Map.of("code", authCode));
+        if (resp == null) {
+            throw new AliyunSmsStarterException("response of aliyun sms is empty");
+        }
+        if (resp.getBody() != null && "OK".equals(resp.getBody().getCode())) {
+            return authCode;
+        }
+        throw new AliyunSmsStarterException(resp.getBody().getMessage());
     }
 
     /**
-     * 根据指定的「短信模板编号」生成 {@link SendSmsRequest}
-     *
-     * @param templateCode 阿里云「短信模板编号」
-     * @param phoneNumber  发送的手机号
+     * @param phoneNumber   接收短信的手机号
+     * @param templateName  短信模板名称（用于获取配置的短信模板编号）
+     * @param templateParam 短信模板变量（kv结构）
+     * @return {@link SendSmsResponse}
+     */
+    public SendSmsResponse send(String phoneNumber, String templateName, Map<String, String> templateParam) throws Exception {
+        return client.sendSms(createSendSmsRequest(phoneNumber, templateName, templateParam));
+    }
+
+    /**
+     * @param phoneNumber   接收短信的手机号
+     * @param templateCode  短信模板编号
+     * @param templateParam 短信模板变量（JSON字符串）
+     * @return {@link SendSmsResponse}
+     */
+    public SendSmsResponse send(String phoneNumber, String templateCode, String templateParam) throws Exception {
+        return client.sendSms(createSendSmsRequest(phoneNumber, templateCode, templateParam));
+    }
+
+    /**
+     * @param phoneNumber   接收短信的手机号
+     * @param templateName  短信模板名称（用于获取配置的短信模板编号）
+     * @param templateParam 短信模板变量（kv结构）
      * @return {@link SendSmsRequest}
      */
-    public SendSmsRequest createSendSmsRequest(String templateCode, String phoneNumber) {
+    public SendSmsRequest createSendSmsRequest(String phoneNumber, String templateName, Map<String, String> templateParam) {
+        String templateCode = aliyunSmsProperties.getTemplateCode(templateName);
+        return createSendSmsRequest(phoneNumber, templateCode, Utils.toJsonObject(templateParam));
+    }
+
+    /**
+     * @param phoneNumber   接收短信的手机号
+     * @param templateCode  短信模板编号
+     * @param templateParam 短信模板变量（JSON字符串）
+     * @return {@link SendSmsRequest}
+     */
+    public SendSmsRequest createSendSmsRequest(String phoneNumber, String templateCode, String templateParam) {
         return new SendSmsRequest()
                 .setSignName(aliyunSmsProperties.getSignature())
                 .setTemplateCode(templateCode)
-                .setTemplateParam(aliyunSmsProperties.getTemplateParam(templateCode))
+                .setTemplateParam(templateParam)
                 .setPhoneNumbers(phoneNumber);
     }
 

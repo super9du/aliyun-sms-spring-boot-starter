@@ -11,17 +11,27 @@
 
 package super9du.sia.aliyun.sms;
 
-import org.springframework.util.StringUtils;
+import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 
 final class Utils {
-    public static void requireNotBlack(String s, String message) {
-        if (StringUtils.hasText(s)) {
-            return;
-        }
-        throw new IllegalStateException(message);
-    }
 
     public static String toJsonList(Iterable<CharSequence> strList) {
         return "[\"" + String.join("\",\"", strList) + "\"]";
     }
+
+    public static String toJsonObject(Map<String, String> map) {
+        StringBuilder buf = new StringBuilder();
+        buf.append('{');
+        map.forEach((k, v) -> buf.append('"').append(k).append('"').append(':')
+                .append('"').append(v).append('"').append(','));
+        buf.deleteCharAt(buf.length() - 1);
+        buf.append('}');
+        return buf.toString();
+    }
+
+    public static String generateAuthCode() {
+        return String.valueOf(ThreadLocalRandom.current().nextInt(10000));
+    }
+
 }

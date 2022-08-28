@@ -14,6 +14,7 @@ package super9du.sia.aliyun.sms;
 import lombok.Data;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.util.Assert;
 
 import java.util.Map;
 
@@ -39,23 +40,34 @@ public class AliyunSmsProperties implements InitializingBean {
     private String signature;
 
     /**
-     * 短信模板
-     * <p>
-     * key 为「短信模板编号」，value 为「短信模板变量」
+     * key 为「短信模板编号名称」，value 为「短信模板编号」
      */
     private Map<String, String> templates;
 
-    public String getTemplateParam(String templateCode) {
-        return templates.get(templateCode);
+    public String getTemplateCode(String templateName) {
+        return templates.get(templateName);
+    }
+
+    /**
+     * 如果只配置了一个 TemplateCode，则返回该 TemplateCode；
+     * 否则抛出异常。
+     *
+     * @return 短信模板编号
+     */
+    public String getTemplateCodeIfOnlyOne() {
+        int size = templates.size();
+        if (size != 1) throw new AliyunSmsStarterException("仅能在只配置了一个 TemplateCode 时使用");
+        return templates.values().stream().findFirst().get();
     }
 
     @Override
     public void afterPropertiesSet() {
-        Utils.requireNotBlack(accessKeyId, "properties aliyun.sms.accessKeyId is black");
-        Utils.requireNotBlack(accessKeySecret, "properties aliyun.sms.accessKeySecret is black");
-        Utils.requireNotBlack(signature, "properties aliyun.sms.signature is black");
+        Assert.hasText(accessKeyId, "properties aliyun.sms.accessKeyId is black");
+        Assert.hasText(accessKeySecret, "properties aliyun.sms.accessKeySecret is black");
+        Assert.hasText(signature, "properties aliyun.sms.signature is black");
         if (templates.size() <= 1) {
             throw new IllegalStateException("properties aliyun.sms.signature templates is not set");
         }
     }
+
 }

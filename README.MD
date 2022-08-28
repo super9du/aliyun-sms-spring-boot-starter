@@ -7,8 +7,6 @@
 Spring Boot 版本: 2.7.2
 ```
 
-在实际开发中短信模板编号可以定义为枚举类，短信模板参数可以通过配置文件修改，无需修改代码。
-
 用法
 ---
 
@@ -38,11 +36,11 @@ Spring Boot 版本: 2.7.2
        AliyunSmsTemplate template;
    
        void test() throws Exception {
-           // 在实际开发中短信模板编号可以定义为枚举类，短信模板参数可以通过配置文件修改。
-           SendSmsResponse resp1 = template.send("短信模板编号", "13245678901");
+           // 如果只配置了一个「短信模板编号」，那么可以直接使用 sendAuthCode 发送验证码
+           SendSmsResponse resp1 = template.sendAuthCode("13245678901");
    
            // 使用阿里云原生的客户端能力
-           client.sendSms(template.createSendSmsRequest("短信模板编号", "13245678901"));
+           client.sendSms(template.createSendSmsRequest("短信模板编号", "13245678901", "{\"code\":\"1234\"}"));
            // client.xxx()
        }
    }
