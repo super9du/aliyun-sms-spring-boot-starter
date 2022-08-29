@@ -40,10 +40,10 @@ public class AliyunSmsTemplate {
      * @throws IllegalStateException 使用阿里云客户端发送短信的响应与预期不符
      */
     public String sendAuthCode(String phoneNumber) throws Exception {
-        String templateCode, authCode;
-        templateCode = aliyunSmsProperties.getTemplateCodeIfOnlyOne();
+        String templateName, authCode;
+        templateName = aliyunSmsProperties.getTemplateNameIfOnlyOne();
         authCode = Utils.generateAuthCode();
-        SendSmsResponse resp = send(templateCode, phoneNumber, Map.of("code", authCode));
+        SendSmsResponse resp = send(phoneNumber, templateName, Map.of("code", authCode));
         if (resp == null) {
             throw new AliyunSmsStarterException("response of aliyun sms is empty");
         }

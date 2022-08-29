@@ -60,6 +60,12 @@ public class AliyunSmsProperties implements InitializingBean {
         return templates.values().stream().findFirst().get();
     }
 
+    public String getTemplateNameIfOnlyOne() {
+        int size = templates.size();
+        if (size != 1) throw new AliyunSmsStarterException("仅能在只配置了一个 TemplateCode 时使用");
+        return templates.keySet().stream().findFirst().get();
+    }
+
     @Override
     public void afterPropertiesSet() {
         Assert.hasText(accessKeyId, "properties aliyun.sms.accessKeyId is black");
