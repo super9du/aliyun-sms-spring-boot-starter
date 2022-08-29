@@ -31,7 +31,7 @@ final class Utils {
     }
 
     public static String generateAuthCode() {
-        return String.valueOf(ThreadLocalRandom.current().nextInt(10000));
+        return String.valueOf(ThreadLocalRandom.current().nextInt(9000) + 1000);
     }
 
 }
